@@ -1,37 +1,74 @@
 # Lepton AI PID
-The first step is to generate and reconstruct the events used for training. Flat distributions of the signal and the background.
-The next steps are assuming each sample for signal and for background are stored in root files that contains all the relevant information for training.
+
+The first step is to generate and reconstruct the events used for training. These should follow flat distributions for both signal and background.
+
+The next steps assume that each signal and background sample is stored in ROOT files containing all the relevant information for training.
+
 ## Training
-Make sure that the location of the files in lines 35-36 is correct. `TMVAClassification.C` will train using the MLP and BDT methods using all 9 variables. To edit this just remove or add the variables as needed. You can then run it using:
+
+Make sure the file paths in lines 35–36 of `TMVAClassification.C` are correct. This script trains models using the MLP and BDT methods with all 9 variables. To customize, simply remove or add variables as needed. Run the training with:
+
 ```
 root -l TMVAClassification.C
 ```
+
 ## Testing
-Use `TMVAClassificationApplication` to test the model. The result is a root file that contains the variables and the score assigned from each model.
+
+Use `TMVAClassificationApplication.C` to test the trained models. The output is a ROOT file that contains the input variables and the scores assigned by each model:
+
 ```
 root -l TMVAClassificationApplication.C
 ```
 
 ## Validation
-The validation is don on the signal (signal preservation) and background (background suppresion). 
-`Rad_electron.C` is the old version of the code, but can still be used as a base for basic test. For the most up-to-date validation codes use `Rad_analysis.C` and `Background_updated`. I am using `clas12root` but I think that just by removing the clas12root libraries you can run it on `root`.
-### Signal 
-It used the fact that as leptons travel through the detector, they radiate photons, so it associate the lepton to its corresponding photon. The peak at zero in DeltaTheta represents a match. 
-For the validation of signal use `Rad_analysis`. First parameter is the name of the file, then the configuration (Fall18inbending=-18, Fall18outbending=18, Spring19=-19), the next is the BDT model to be used (6 or 9 variables), and finally the lepton to be tested (electron=11, positron=-11). Modify the locations accordently. 
-```
-clas12root 'Rad_analysis.C("pos_S19_BDT",-19,6,-11)' -q -b
-```
-For the validation of background, we use the reaction `ep\rightarrow e^- \pi_{PID=-11}^+ (X)` to identify the background. Here, the first parameter is the name of the file to test, then the configuratuon, the model, the train that was used and finally the lepton to be tested. 
-```
-clas12root 'Background_updated.C("pos_S19_BDT",-19,6,"jpsitcs",-11)' -q -b
-```
-## Visualization of data
-Modify the main funtion inside `plot.C`.
 
--`Variable_Plots_TMVA`: It plots the distributions of the 9 variables overlapping: True Positives and True Negatives, True Positives and False Positives, Negative Sample and False Positives, and Positive Sample and True Positives.
+Validation is performed both on the signal (signal preservation) and the background (background suppression).
 
--`True_False`: Plots only True Positive vs False Positive, True Negative vs False Negative.
+`Rad_electron.C` is an older version of the code and can be used as a reference for basic testing. For the most up-to-date validation, use `Rad_analysis.C` and `Background_updated.C`. These scripts use `clas12root`, but they may also run under standard `root` if the CLAS12-specific libraries are removed.
 
--`ROC`: Plots the ROC of the dataset. This is for simulations only.
+### Signal Validation
 
--`Print_Table`: Displays True Positives, False Positives, True Negatives and False Negative values on screen. 
+This method relies on the fact that leptons radiate photons as they travel through the detector, allowing association between a lepton and its corresponding photon. A peak at zero in the Δθ (DeltaTheta) distribution indicates a match.
+
+To validate the signal, use `Rad_analysis.C`:
+
+- **Parameter 1**: Name of the file  
+- **Parameter 2**: Configuration (`Fall18inbending = -18`, `Fall18outbending = 18`, `Spring19 = -19`)  
+- **Parameter 3**: BDT model used (6 or 9 variables)  
+- **Parameter 4**: Lepton type (`electron = 11`, `positron = -11`)  
+
+```
+clas12root 'Rad_analysis.C("pos_S19_BDT", -19, 6, -11)' -q -b
+```
+
+### Background Validation
+
+For background validation, the process uses the reaction `ep → e⁻ π⁺ (X)`, where the pion is misidentified as an electron (`PID = -11`). The parameters are:
+
+- **Parameter 1**: Name of the file  
+- **Parameter 2**: Configuration  
+- **Parameter 3**: BDT model used  
+- **Parameter 4**: Training tag  
+- **Parameter 5**: Lepton type  
+
+```
+clas12root 'Background_updated.C("pos_S19_BDT", -19, 6, "jpsitcs", -11)' -q -b
+```
+
+## Visualization of Data
+
+Modify the main function inside `plot.C` to select which plots to generate:
+
+- **`Variable_Plots_TMVA`**: Plots the distributions of the 9 variables, showing combinations such as:
+  - True Positives vs. True Negatives  
+  - True Positives vs. False Positives  
+  - Negative Sample vs. False Positives  
+  - Positive Sample vs. True Positives
+
+- **`True_False`**: Plots:
+  - True Positive vs. False Positive  
+  - True Negative vs. False Negative
+
+- **`ROC`**: Plots the ROC curve of the dataset (simulations only).
+
+- **`Print_Table`**: Displays counts of True Positives, False Positives, True Negatives, and False Negatives in the terminal.
