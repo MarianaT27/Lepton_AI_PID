@@ -13,8 +13,18 @@ root -l TMVAClassificationApplication.C
 ```
 
 ## Validation
-
-
+The validation is don on the signal (signal preservation) and background (background suppresion). 
+`Rad_electron.C` is the old version of the code, but can still be used as a base for basic test. For the most up-to-date validation codes use `Rad_analysis.C` and `Background_updated`. I am using `clas12root` but I think that just by removing the clas12root libraries you can run it on `root`.
+### Signal 
+It used the fact that as leptons travel through the detector, they radiate photons, so it associate the lepton to its corresponding photon. The peak at zero in DeltaTheta represents a match. 
+For the validation of signal use `Rad_analysis`. First parameter is the name of the file, then the configuration (Fall18inbending=-18, Fall18outbending=18, Spring19=-19), the next is the BDT model to be used (6 or 9 variables), and finally the lepton to be tested (electron=11, positron=-11). Modify the locations accordently. 
+```
+clas12root 'Rad_analysis.C("pos_S19_BDT",-19,6,-11)' -q -b
+```
+For the validation of background, we use the reaction `ep\rightarrow e^- \pi_{PID=-11}^+ (X)` to identify the background. Here, the first parameter is the name of the file to test, then the configuratuon, the model, the train that was used and finally the lepton to be tested. 
+```
+clas12root 'Background_updated.C("pos_S19_BDT",-19,6,"jpsitcs",-11)' -q -b
+```
 ## Visualization of data
 Modify the main funtion inside `plot.C`.
 
