@@ -12,6 +12,9 @@ Use `TMVAClassificationApplication` to test the model. The result is a root file
 root -l TMVAClassificationApplication.C
 ```
 
+## Validation
+
+
 ## Visualization of data
 Modify the main funtion inside `plot.C`.
 
